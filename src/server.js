@@ -1,3 +1,7 @@
+//banco de dados
+const database = require("./database/sqlite")
+database();
+
 //lidando com rotas
 const express = require("express");
 const routes = require("./routes");
