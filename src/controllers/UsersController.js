@@ -24,6 +24,54 @@ class UsersController {
     
     return res.status(201).json({ name, email, password });
   }
+
+  async update(req, res){
+    const {name, email, password, old_password} = req.body
+    const {id} = req.params
+
+    const database = await sqliteConnection();
+    const user = await database.get("SELECT * FROM users WHERE id = (?)", [id])
+
+    if(!user){
+      throw new AppError("Usuário não encontrado");
+    }
+
+    const userWithUpdatedEmail = await database.get("SELECT * FROM users WHERE email = (?)", [email]);
+
+    if(userWithUpdatedEmail && userWithUpdatedEmail.id !== id){
+      throw new AppError("Usuário já cadastrado!")
+    }
+
+    user.name = name ?? user.name;
+    user.email = email ?? user.email;
+
+    if(password && !old_password){
+      throw new AppError("Informe a senha antiga!")
+    }
+    
+    if(password && old_password){
+      const checkOldPassword = await compare(old_password, password);
+
+      if (!checkOldPassword) {
+        throw new AppError("A senha não confere.");
+      }
+
+      user.password = await hash(password, 8)
+    }
+
+    await database.run(`
+      UPDATE users SET
+      name = ?,
+      email = ?,
+      password = ?,
+      updated_at = DATETIME('now')
+      WHERE id = ?`,
+      [user.name, user.email,user.password, id]
+    )
+
+    return res.status(200).json;
+
+  }
   
 }
 
