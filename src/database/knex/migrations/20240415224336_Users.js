@@ -1,5 +1,5 @@
-export async function up(knex) {
-  return await knex.schema.createTable("users", (table) => {
+exports.up = (knex) =>
+  knex.schema.createTable("users", (table) => {
     table.increments("id").primary();
     table.boolean("isAdmin");
     table.string("name");
@@ -9,8 +9,5 @@ export async function up(knex) {
     table.datetime("created_at").defaultTo(knex.fn.now());
     table.datetime("updated_at").defaultTo(knex.fn.now());
   });
-}
 
-export async function down(knex) {
-  return await knex.schema.dropTable("users");
-}
+exports.down = (knex) => knex.schema.dropTable("users");

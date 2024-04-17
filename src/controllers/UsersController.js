@@ -1,11 +1,11 @@
-const { hash } = require("bcrypt");
+const { hash, compare } = require("bcrypt");
 const AppError = require("../utils/AppError");
 const sqliteConnection = require("../database/sqlite");
 
 
 class UsersController {
   async create(req, res) {
-    const { name, email, password } = req.body;
+    const { name, email, password, isAdmin } = req.body;
 
     if(!name){
       throw new AppError("Nome obrigatório!")
@@ -38,7 +38,7 @@ class UsersController {
 
     const userWithUpdatedEmail = await database.get("SELECT * FROM users WHERE email = (?)", [email]);
 
-    if(userWithUpdatedEmail && userWithUpdatedEmail.id !== id){
+    if(userWithUpdatedEmail && userWithUpdatedEmail.id !== user.id){
       throw new AppError("Usuário já cadastrado!")
     }
 
@@ -50,7 +50,7 @@ class UsersController {
     }
     
     if(password && old_password){
-      const checkOldPassword = await compare(old_password, password);
+      const checkOldPassword = await compare(old_password, user.password);
 
       if (!checkOldPassword) {
         throw new AppError("A senha não confere.");
@@ -69,7 +69,9 @@ class UsersController {
       [user.name, user.email,user.password, id]
     )
 
-    return res.status(200).json;
+    return res.status(200).json();
+
+    
 
   }
   
