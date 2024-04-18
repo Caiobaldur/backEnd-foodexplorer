@@ -1,16 +1,18 @@
+//lidando com erros
+require("express-async-errors")
+//lidando com rotas
+const express = require("express");
+const routes = require("./routes");
 //banco de dados
 const database = require("./database/sqlite")
 database();
 
 //lidando com rotas
-const express = require("express");
-const routes = require("./routes");
 const app = express();
 app.use(express.json());
 app.use(routes);
 
 //lidando com erros
-require("express-async-errors")
 const AppError = require("./utils/AppError");
 app.use((error,request,response,next) => {
   if(error instanceof AppError){
@@ -27,8 +29,6 @@ app.use((error,request,response,next) => {
     message: "Internal server error",
   })
 })
-
-
 
 
 const PORT = 3333;
