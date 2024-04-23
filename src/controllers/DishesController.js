@@ -1,5 +1,4 @@
 const knex = require("knex");
-const connection = require("../database/knex");
 const AppError = require("../utils/AppError");
 
 class DishesController {
@@ -26,6 +25,41 @@ class DishesController {
     })
     await knex('ingredients').insert(insertIngredients)
 
-    return res.status(201).json({message: 'Prato cadastrado com sucesso!'})
+    return res.status(201).json({message: 'O prato foi cadastrado com sucesso!'})
   }
+
+  async update(req,res) {
+    try {
+      const {name, description, image, price, category, ingredients} = req.body
+      const dish_id = req.params.id 
+
+      await knex('dishes').where({id: dish_id}).update({
+        name,
+        description,
+        image,
+        price,
+        category,
+      }) 
+
+      await knex('ingredients').where({dish_id}).del()
+
+      const newIngredients = ingredients.map((ingredient) => {
+        return {
+          dish_id,
+          name: ingredient,
+        }
+      })
+
+      await knex("ingredients").insert(newIngredients)
+
+      return res.status(201).json({message:'Prato atualizado!'})
+    } catch(error) {
+        AppError("Não foi possivel atualizar prato:", error)
+        return res.status(500).json({message: 'Não foi possivel atualizar prato'})
+    }
+  }
+
+  
 }
+
+module.exports = DishesController;
