@@ -15,4 +15,4 @@ dishesRoutes.put("/:id", dishesController.update);
 dishesRoutes.delete("/:id", dishesController.delete);
 
 
-module.exports = dishesRouter;
+module.exports = dishesRoutes;

@@ -1,6 +1,8 @@
 const AppError = require("../utils/AppError");
 const { knex } = require("../database/knex");
 const { compare } = require("bcrypt");
+const authConfig = require("../configs/auth");
+const { sign } = require("jsonwebtoken");
 
 
 
@@ -20,7 +22,13 @@ class SessionsController {
       throw new AppError("Email e/ou senha incorreta!", 401);
     }
 
-    return response.json({email, password})
+    const {secret, expireIn} = authConfig.jwt;
+    const token = sign({}, secret, {
+      subject: String(user.id),
+      expireIn
+    })
+
+    return response.json({user, token})
   }
 
 }
