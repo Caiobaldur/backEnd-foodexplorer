@@ -15,6 +15,7 @@ class DishesController {
       name,
       description,
       image,
+      price,
       category,
     })
 
