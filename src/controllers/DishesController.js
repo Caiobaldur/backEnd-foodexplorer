@@ -3,6 +3,7 @@ const AppError = require("../utils/AppError");
 
 class DishesController {
   async create(req,res) {
+
     const {name, description, image, price, category, ingredients} = req.body
     const checkDish = await knex('dishes').where('name', name).select('*').first()
 

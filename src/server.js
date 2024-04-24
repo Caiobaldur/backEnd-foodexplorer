@@ -1,18 +1,14 @@
-//lidando com erros
 require("express-async-errors")
-//lidando com rotas
 const express = require("express");
 const routes = require("./routes");
-//banco de dados
 const database = require("./database/sqlite")
+
+const app = express();
 database();
 
-//lidando com rotas
-const app = express();
 app.use(express.json());
 app.use(routes);
 
-//lidando com erros
 const AppError = require("./utils/AppError");
 app.use((error,request,response,next) => {
   if(error instanceof AppError){

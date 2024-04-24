@@ -85,6 +85,21 @@ class UsersController {
 
     return res.status(200).json();
   }
+  
+  async delete(req, res) {
+    const { id } = req.params;
+
+    const database = await sqliteConnection();
+    const user = await database.get("SELECT * FROM users WHERE id = (?)", [id]);
+
+    if (!user) {
+      throw new AppError("Usuário não encontrado");
+    }
+
+    await database.run("DELETE FROM users WHERE id = (?)", [id]);
+
+    return res.status(204).json();
+  }
 }
 
 module.exports = UsersController;
