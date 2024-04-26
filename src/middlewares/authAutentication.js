@@ -13,18 +13,18 @@ async function verifyUserAuth(req, res, next) {
   const [, token] = authHeader.split(" ");
 
   try {
-    const { sub: user_id } = verify(token, authConfig.jwt.secret);
+    const { role, sub: user_id } = verify(token, authConfig.jwt.secret);
 
     const database = await sqliteConnection();
     const user = await database.get("SELECT * FROM users WHERE id = ?", [user_id]);
-
+    
     if (!user) {
       throw new AppError("Usuário não encontrado", 404);
     }
-
+    
     req.user = {
       id: user.id,
-      role: user.role,
+      role,
     };
 
     return next();

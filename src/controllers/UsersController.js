@@ -11,11 +11,11 @@ class UsersController {
     }
 
     const database = await sqliteConnection();
-    const checkUserExists = await database.get("SELECT * FROM users");
+    const [existingUserCount] = await database.all("SELECT COUNT(*) AS count FROM users");
 
     let isAdmin = false;
 
-    if (!checkUserExists) {
+    if (existingUserCount.count === 0) {
       isAdmin = true;
     }
 
