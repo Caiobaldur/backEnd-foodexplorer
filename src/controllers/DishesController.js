@@ -3,7 +3,6 @@ const AppError = require("../utils/AppError");
 
 class DishesController {
   async create(req, res) {
-    console.log("oi denovo");
     const { name, description, image, price, category, ingredients } = req.body;
     try {
       const checkDish = await knex("dishes").where("name", name).first();
@@ -61,13 +60,13 @@ class DishesController {
 
       return res.status(201).json({message:'Prato atualizado!'})
     } catch(error) {
-        AppError("Não foi possivel atualizar prato:", error)
+       new AppError("Não foi possivel atualizar prato:", error)
         return res.status(500).json({message: 'Não foi possivel atualizar prato'})
     }
   }
 
   async show(req, res) {
-    const {id} = req.params
+    const {id} = req.params;
     try {
       const dish = await knex('dishes').where('id', id).first()
       if (!dish) {
