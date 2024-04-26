@@ -5,8 +5,7 @@ const  verifyAdminAuth  = require("../middlewares/adminAutentication")
 const dishesRoutes = Router();
 const dishesController = new DishesController();
 
-
-
+dishesRoutes.use(verifyAdminAuth)
 
 dishesRoutes.get("/", dishesController.index);
 dishesRoutes.get("/:id", dishesController.show);

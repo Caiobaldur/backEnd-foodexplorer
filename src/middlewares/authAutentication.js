@@ -13,7 +13,7 @@ async function verifyUserAuth(req, res, next) {
   const [, token] = authHeader.split(" ");
 
   try {
-    const { role, sub: user_id } = verify(token, authConfig.jwt.secret);
+    const { sub: user_id } = verify(token, authConfig.jwt.secret);
 
     const database = await sqliteConnection();
     const user = await database.get("SELECT * FROM users WHERE id = ?", [user_id]);
@@ -23,8 +23,7 @@ async function verifyUserAuth(req, res, next) {
     }
     
     req.user = {
-      id: user.id,
-      role,
+      id: user.id
     };
 
     return next();

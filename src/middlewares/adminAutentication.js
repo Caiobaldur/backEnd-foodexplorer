@@ -1,18 +1,34 @@
+const { verify } = require("jsonwebtoken");
 const AppError = require("../utils/AppError");
+const authConfig = require("../configs/auth");
+const sqliteConnection = require("../database/sqlite");
 
-async function verifyAdminAuth(roleToVerify) {
-  return (req,res,next) => {
-    const {role} = req.body
+async function verifyAdminAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    throw new AppError("Token JWT não encontrado", 401);
+  }
+
+  const [, token] = authHeader.split(" ");
+
+  try {
+    const { sub: user_id } = verify(token, authConfig.jwt.secret);
+
+    const database = await sqliteConnection();
+    const user = await database.get("SELECT * FROM users WHERE id = ?", [user_id]);
     
-    if (!req.user) {
-      throw new AppError("Usuário não autenticado", 401);
+    if (!user) {
+      throw new AppError("Usuário não encontrado", 404);
     }
-    
-    if (req.user.role !== "admin") {
-      throw new AppError("Acesso negado. Apenas administradores têm permissão para esta operação", 403);
+
+    if (!user.isAdmin) {
+      throw new AppError("Apenas administradores têm permissão para esta operação", 403);
     }
-    
+
     return next();
+  } catch (error) {
+    throw new AppError("Token inválido para essa operação!", 401);
   }
 }
 

@@ -1,33 +1,38 @@
-const knex = require("knex");
+const  knex  = require("../database/knex");
 const AppError = require("../utils/AppError");
 
 class DishesController {
-  async create(req,res) {
+  async create(req, res) {
+    console.log("oi denovo");
+    const { name, description, image, price, category, ingredients } = req.body;
+    try {
+      const checkDish = await knex("dishes").where("name", name).first();
 
-    const {name, description, image, price, category, ingredients} = req.body
-    const checkDish = await knex('dishes').where('name', name).select('*').first()
-
-    if(checkDish) {
-      throw new AppError('Prato já cadastrado!', 409)
-    }
-
-    const [dish_id] = await knex('dishes').insert({
-      name,
-      description,
-      image,
-      price,
-      category,
-    })
-
-    const insertIngredients = ingredients.map((name) => {
-      return {
-        dish_id,
-        name,
+      if (checkDish) {
+        throw new AppError("Prato já cadastrado!", 409);
       }
-    })
-    await knex('ingredients').insert(insertIngredients)
 
-    return res.status(201).json({message: 'O prato foi cadastrado com sucesso!'})
+      const [dish_id] = await knex("dishes").insert({
+        name,
+        description,
+        image,
+        price,
+        category,
+      });
+
+      const insertIngredients = ingredients.map((ingredient) => {
+        return {
+          dish_id,
+          name: ingredient,
+        };
+      });
+      await knex("ingredients").insert(insertIngredients);
+
+      return res.status(201).json({ message: "O prato foi cadastrado com sucesso!" });
+    } catch (error) {
+      console.error(error);
+      return res.status(error.statusCode || 500).json({ message: error.message || "Erro interno do servidor" });
+    }
   }
 
   async update(req,res) {
@@ -64,7 +69,10 @@ class DishesController {
   async show(req, res) {
     const {id} = req.params
     try {
-      const dish = await knex.select('*').from('dishes').where('id', id).first()
+      const dish = await knex('dishes').where('id', id).first()
+      if (!dish) {
+        throw new AppError("Prato não encontrado", 404);
+      }
       const ingredients = await knex('ingredients').where('dish_id', id)
       const dishesWithIngredients = {dish, ingredients}
       return res.status(200).json(dishesWithIngredients)
@@ -99,6 +107,7 @@ class DishesController {
       }
 
       const dishes = await dishesQuery
+
       return res.status(200).json(dishes)
     } catch(error){
       AppError("Não foi possível buscar pratos", error)

@@ -1,8 +1,8 @@
 exports.up = (knex) =>
   knex.schema.createTable("orders", (table) => {
     table.increments("id").primary();
-    table.integer("user_id").references("id").inTable("Users");
-    table.integer("dish_id").references("id").inTable("Dish");
+    table.integer("user_id").references("id").inTable("users");
+    table.integer("dish_id").references("id").inTable("dishes");
     table.integer("amount");
     table.string("status");
     table.datetime("created_at").defaultTo(knex.fn.now());
