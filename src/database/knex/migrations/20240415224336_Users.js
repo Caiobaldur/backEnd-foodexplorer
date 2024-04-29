@@ -5,7 +5,6 @@ exports.up = (knex) =>
     table.string("email");
     table.string("password");
     table.boolean("isAdmin");
-    table.string("adress");
     table.string("avatar");
     table.datetime("created_at").defaultTo(knex.fn.now());
     table.datetime("updated_at").defaultTo(knex.fn.now());
