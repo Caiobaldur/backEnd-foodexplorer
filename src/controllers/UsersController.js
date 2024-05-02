@@ -5,36 +5,47 @@ const sqliteConnection = require("../database/sqlite");
 class UsersController {
   async create(req, res) {
     const { name, email, password } = req.body;
-
-    if (!name) {
-      throw new AppError("Nome obrigatório!");
+  
+    if (!name || !email || !password) {
+      throw new AppError("Nome, email e senha são obrigatórios!");
     }
-
+  
     const database = await sqliteConnection();
-    const [existingUserCount] = await database.all("SELECT COUNT(*) AS count FROM users");
+  
+  const existingUserByName = await database.get("SELECT * FROM users WHERE name = ?", [name]);
+  if (existingUserByName) {
+    throw new AppError("Nome de usuário já está em uso!");
+  }
 
+  const existingUserByEmail = await database.get("SELECT * FROM users WHERE email = ?", [email]);
+  if (existingUserByEmail) {
+    throw new AppError("Email já está em uso!");
+  }
+
+  const [existingUserCount] = await database.all("SELECT COUNT(*) AS count FROM users");
+  
     let isAdmin = false;
-
+  
     if (existingUserCount.count === 0) {
       isAdmin = true;
     }
-
+  
     const hashedPassword = await hash(password, 8);
-
+  
     await database.run("INSERT INTO users (name, email, password, isAdmin) VALUES (?, ?, ?, ?)", [
       name,
       email,
       hashedPassword,
       isAdmin ? 1 : 0,
     ]);
-
+  
     // Verifica se o usuário recém-criado é administrador
     const user = await database.get("SELECT * FROM users WHERE email = ?", [email]);
     const roleId = isAdmin ? 1 : 2; // 1 para admin, 2 para customer
-
+  
     // Associa o usuário à role correspondente na tabela 'roles'
     await database.run("INSERT INTO roles (user_id, role) VALUES (?, ?)", [user.id, roleId]);
-
+  
     return res.status(201).json({ name, email, isAdmin });
   }
 
